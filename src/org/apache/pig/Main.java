@@ -379,6 +379,15 @@ static int run(String args[], PigProgressNotificationListener listener) {
         // configure logging
         configureLog4J(properties, pigContext);
 
+        Properties p = new Properties();
+        PropertiesUtil.loadPropertiesFromClasspath(p, "/pig.build.properties");
+        log.info(p.getProperty("Implementation-Vendor")
+                + " " + p.getProperty("Implementation-Title")
+                + " " + p.getProperty("Implementation-Version")
+                + " revision " + p.getProperty("Svn-Revision")
+                + " built by " + p.getProperty("Built-By")
+                + " at " + p.getProperty("Build-TimeStamp"));
+
         if(logFileName != null) {
             log.info("Logging error messages to: " + logFileName);
         }

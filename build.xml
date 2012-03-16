@@ -306,13 +306,14 @@
         <mkdir dir="${test.build.classes}" />
         <mkdir dir="${src.gen.dot.parser.dir}" />
         <mkdir dir="${src.gen.textdata.parser.dir}" />
-  	<move file="${ivy.lib.dir}/javacc-${javacc.version}.jar" tofile="${javacc.home}/javacc.jar"/>
+        <move file="${ivy.lib.dir}/javacc-${javacc.version}.jar" tofile="${javacc.home}/javacc.jar"/>
         <tstamp>
             <format property="timestamp" pattern="MMM dd yyyy, HH:mm:ss" />
         </tstamp>
         <svnversion outputproperty="svn.revision"/>
     </target>
 
+    <!-- Version will be "exported" if building outside an SVN repo (git repo for example) -->
     <macrodef name="svnversion">
         <!-- the path needs to be small content otherwise it will take AGES ! -->
         <attribute name="wcpath" default="${basedir}" />
@@ -329,6 +330,7 @@
                     </outputfilterchain>
                 </redirector>
             </exec>
+            <echo message="Building at svn version: ${@{outputproperty}}"/>
         </sequential>
     </macrodef>
 
@@ -586,7 +588,8 @@
     <!-- ================================================================== -->
     <!-- Utility to build pig.jar and pig-withouthadoop.jar                 -->
     <!-- ================================================================== -->
-    <target name="jar-all" depends="jar,jar-withouthadoop" description="Create pig-all.jar and pig-withouthadoop.jar">
+    <target name="jar-all" depends="gen-build-properties,jar,jar-withouthadoop"
+            description="Create pig-all.jar and pig-withouthadoop.jar">
     </target>
 
     <target name="include-meta" if="isHadoop23">
@@ -609,6 +612,19 @@
             <zipfileset src="${output.stage.jarfile}"/>
             <fileset dir="${build.classes}" includes="META-INF/**" />
         </jar>
+    </target>
+
+    <!-- Use a properties file instead of manifest attributes to survive rejaring. -->
+    <target name="gen-build-properties" depends="init, compile"
+            description="Generate a properties file with details about this build.">
+        <propertyfile file="${build.classes}/pig.build.properties">
+            <entry key="Implementation-Vendor" value="Apache"/>
+            <entry key="Implementation-Title" value="Pig"/>
+            <entry key="Implementation-Version" value="${version}"/>
+            <entry key="Svn-Revision" value="${svn.revision}"/>
+            <entry key="Built-By" value="${user.name}"/>
+            <entry key="Build-TimeStamp" value="${timestamp}"/>
+        </propertyfile>
     </target>
 
     <!-- ================================================================== -->

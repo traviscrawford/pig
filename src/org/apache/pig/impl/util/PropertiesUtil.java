@@ -103,7 +103,7 @@ public class PropertiesUtil {
      * property values provided in the file.
      * @param fileName file name of the properties' file.
      */
-    private static void loadPropertiesFromClasspath(Properties properties,
+    public static void loadPropertiesFromClasspath(Properties properties,
             String fileName) {
         InputStream inputStream = null;
         Class<PropertiesUtil> clazz = PropertiesUtil.class;

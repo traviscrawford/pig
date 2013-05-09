@@ -35,4 +35,13 @@ public class PigConstants {
 
     // This makes it easy to turn SchemaTuple on globally.
     public static final boolean SCHEMA_TUPLE_ON_BY_DEFAULT = false;
+
+    /**
+     * {@value} (default: {@value #PIG_OPTIMIZER_RULES_DISABLED_DEFAULT}).
+     * By default all optimization rules are enabled. This comma-separated
+     * list of optimizer rules allows users to disable optimizations, either
+     * in their script itself or globally through pig.properties.
+     */
+    public static final String PIG_OPTIMIZER_RULES_DISABLED_KEY = "pig.optimizer.rules.disabled";
+    public static final String PIG_OPTIMIZER_RULES_DISABLED_DEFAULT = "";
 }

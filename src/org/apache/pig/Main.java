@@ -43,6 +43,8 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import jline.ConsoleReader;
 import jline.ConsoleReaderInputStream;
 import jline.History;
@@ -186,7 +188,7 @@ static int run(String args[], PigProgressNotificationListener listener) {
         boolean embedded = false;
         List<String> params = new ArrayList<String>();
         List<String> paramFiles = new ArrayList<String>();
-        HashSet<String> optimizerRules = new HashSet<String>();
+        HashSet<String> disabledOptimizerRules = new HashSet<String>();
 
         CmdLineParser opts = new CmdLineParser(pigArgs);
         opts.registerOpt('4', "log4jconf", CmdLineParser.ValueExpected.REQUIRED);
@@ -316,7 +318,7 @@ static int run(String args[], PigProgressNotificationListener listener) {
                 break;
 
             case 't':
-            	optimizerRules.add(opts.getValStr());
+                disabledOptimizerRules.add(opts.getValStr());
                 break;
 
             case 'v':
@@ -391,11 +393,18 @@ static int run(String args[], PigProgressNotificationListener listener) {
 
         if( ! Boolean.valueOf(properties.getProperty(PROP_FILT_SIMPL_OPT, "false"))){
             //turn off if the user has not explicitly turned on this optimization
-            optimizerRules.add("FilterLogicExpressionSimplifier");
+            disabledOptimizerRules.add("FilterLogicExpressionSimplifier");
         }
 
-        if(optimizerRules.size() > 0) {
-            pigContext.getProperties().setProperty("pig.optimizer.rules", ObjectSerializer.serialize(optimizerRules));
+        disabledOptimizerRules.addAll(
+                Lists.newArrayList((Splitter.on(",").split(properties.getProperty(
+                        PigConstants.PIG_OPTIMIZER_RULES_DISABLED_KEY,
+                        PigConstants.PIG_OPTIMIZER_RULES_DISABLED_DEFAULT)))));
+
+        if(disabledOptimizerRules.size() > 0) {
+            log.debug("Disabled optimizer rules: " + disabledOptimizerRules);
+            pigContext.getProperties().setProperty(
+                    "pig.optimizer.rules", ObjectSerializer.serialize(disabledOptimizerRules));
         }
 
         PigContext.setClassLoader(pigContext.createCl(null));
